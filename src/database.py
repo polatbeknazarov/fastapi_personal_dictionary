@@ -1,23 +1,10 @@
-from datetime import datetime
-from sqlalchemy import (
-    Column,
-    Integer,
-    DateTime,
-)
-from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr
+from sqlalchemy.orm import DeclarativeBase, declared_attr
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from config import settings
 
 
-class BaseMixin:
-    id: Mapped[int] = Column(Integer, primary_key=True)
-    created_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow,
-                                  onupdate=datetime.utcnow)
-
-
-class Base(DeclarativeBase, BaseMixin):
+class Base(DeclarativeBase):
     __abstract__ = True
 
     @declared_attr.directive
