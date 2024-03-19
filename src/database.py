@@ -4,16 +4,16 @@ from sqlalchemy import (
     Integer,
     DateTime,
 )
-from sqlalchemy.orm import DeclarativeBase, declared_attr
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from .config import settings
+from config import settings
 
 
 class BaseMixin:
-    id: int = Column(Integer, primary_key=True)
-    created_at: datetime = Column(DateTime, default=datetime.utcnow)
-    updated_at: datetime = Column(DateTime, default=datetime.utcnow,
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    created_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow,
                                   onupdate=datetime.utcnow)
 
 
