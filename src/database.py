@@ -7,7 +7,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from config import settings
+from .config import settings
 
 
 class BaseMixin:
