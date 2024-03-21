@@ -3,3 +3,5 @@ venv/
 .vscode/
 *.sqlite3
 .env
+private.pem
+publick.pem
