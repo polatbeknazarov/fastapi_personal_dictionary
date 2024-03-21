@@ -15,9 +15,11 @@ class Settings(BaseSettings):
     db_echo: bool = True
 
     # JWT Settings
-    ACCESS_TOKEN_EXPIRE_MINUTES = 30
-    REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
-    ALGORITHM = 'RS256'
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    ALGORITHM: str = 'RS256'
+    PRIVATE_KEY_PATH: Path = BASE_DIR / 'private.pem'
+    PUBLICK_KEY_PATH: Path = BASE_DIR / 'publick.pem'
 
 
 settings = Settings()
