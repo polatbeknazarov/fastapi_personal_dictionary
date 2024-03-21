@@ -1,4 +1,5 @@
 import jwt
+from jwt.exceptions import InvalidTokenError
 
 from datetime import datetime, timedelta
 from fastapi import Form, HTTPException, status, Depends
@@ -75,7 +76,11 @@ async def validate_auth_user(username: str = Form(), password: str = Form(), ses
 
 async def get_current_auth_user(credentials: HTTPAuthorizationCredentials = Depends(http_bearer), session: AsyncSession = Depends(database.session_dependency)) -> UserSchema:
     token = credentials.credentials
-    payload = decode_jwt(token=token)
+    try:
+        payload = decode_jwt(token=token)
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token')
 
     username: str | None = payload.get('sub')
 
