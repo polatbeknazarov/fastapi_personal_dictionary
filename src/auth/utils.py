@@ -1,18 +1,8 @@
 import jwt
-from jwt.exceptions import InvalidTokenError
 
 from datetime import datetime, timedelta
-from fastapi import Form, HTTPException, status, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import password_context, settings
-from database import database
-from auth.services import get_user
-from auth.schemas import UserSchema
-
-
-http_bearer = HTTPBearer()
 
 
 def get_hashed_password(password: str) -> str:
@@ -49,55 +39,3 @@ def decode_jwt(token: str | bytes, publick_key: str = settings.PUBLICK_KEY_PATH.
     decoded = jwt.decode(jwt=token, key=publick_key, algorithms=[algorithm])
 
     return decoded
-
-
-async def validate_auth_user(username: str = Form(), password: str = Form(), session: AsyncSession = Depends(database.session_dependency)):
-    unauthorized_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail='Invalid username or password'
-    )
-
-    user = await get_user(session=session, username=username)
-
-    if not user:
-        raise unauthorized_exception
-
-    if not verify_password(password=password, hashed_password=user.hashed_password):
-        raise unauthorized_exception
-
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='User is not active',
-        )
-
-    return user
-
-
-async def get_current_auth_user(credentials: HTTPAuthorizationCredentials = Depends(http_bearer), session: AsyncSession = Depends(database.session_dependency)) -> UserSchema:
-    token = credentials.credentials
-    try:
-        payload = decode_jwt(token=token)
-    except InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token')
-
-    username: str | None = payload.get('sub')
-
-    get_user_from_db = await get_user(session=session, username=username)
-
-    if get_user_from_db:
-        return get_user_from_db
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token')
-
-
-async def get_current_user(user: UserSchema = Depends(get_current_auth_user)):
-    if user.is_active:
-        return user
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail='User is not active'
-    )
