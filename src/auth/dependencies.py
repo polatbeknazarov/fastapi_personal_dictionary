@@ -34,15 +34,29 @@ async def validate_auth_user(
     return user
 
 
-async def get_current_auth_user(
-        credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
-        session: AsyncSession = Depends(database.session_dependency)
-) -> UserSchema:
+async def get_user_token_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+):
     token = credentials.credentials
     try:
         payload = decode_jwt(token=token)
+        print('PAYLOAD', payload)
+        return payload
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid token'
+        )
+
+
+async def get_current_auth_user(
+    payload: dict = Depends(get_user_token_payload),
+    session: AsyncSession = Depends(database.session_dependency)
+) -> UserSchema:
+    try:
         username: str | None = payload.get('sub')
         user = await get_user(session=session, username=username)
+
         if user:
             return user
     except InvalidTokenError:

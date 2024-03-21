@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -5,7 +7,7 @@ from database import database
 from auth.schemas import UserCreate, UserSchema, Token
 from auth.services import get_user, create_user
 from auth.utils import encode_jwt
-from auth.dependencies import validate_auth_user, get_current_user
+from auth.dependencies import validate_auth_user, get_current_user, get_user_token_payload
 
 
 router = APIRouter(tags=['auth'])
@@ -43,7 +45,12 @@ async def login_user(user: UserSchema = Depends(validate_auth_user)):
 @router.get('/users/me')
 async def user_check_info(
     user: UserSchema = Depends(get_current_user),
+    payload: dict = Depends(get_user_token_payload),
 ):
+    iat = payload.get('iat')
+    logged_in = datetime.fromtimestamp(iat)
+
     return {
         'username': user.username,
+        'logged_in': logged_in,
     }

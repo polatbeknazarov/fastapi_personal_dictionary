@@ -35,7 +35,11 @@ def encode_jwt(
     return encoded
 
 
-def decode_jwt(token: str | bytes, publick_key: str = settings.PUBLICK_KEY_PATH.read_text(), algorithm: str = settings.ALGORITHM):
+def decode_jwt(
+        token: str | bytes, 
+        publick_key: str = settings.PUBLICK_KEY_PATH.read_text(), 
+        algorithm: str = settings.ALGORITHM,
+):
     decoded = jwt.decode(jwt=token, key=publick_key, algorithms=[algorithm])
 
     return decoded
