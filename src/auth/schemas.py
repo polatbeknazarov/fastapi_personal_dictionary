@@ -8,3 +8,4 @@ class UserCreate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     password: str
+    password2: str
