@@ -1,38 +1,36 @@
-from datetime import datetime
-
 from fastapi import (
     APIRouter,
-    HTTPException,
-    status,
     Depends,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import database
-from auth.schemas import UserCreate, UserSchema, Token, UserRead
+from auth.schemas import (
+    UserCreate,
+    UserSchema,
+    Token,
+    UserRead,
+)
 from auth.services import get_user, create_user
 from auth.utils import encode_jwt
 from auth.dependencies import (
     validate_auth_user,
     get_current_user,
-    get_user_token_payload,
+    validate_registration,
 )
 
 
-router = APIRouter(tags=['auth'])
+router = APIRouter(prefix='/users', tags=['auth',])
 
 
-@router.post('/register', response_model=None)
+@router.post('/register')
 async def register_user(
-    user: UserCreate,
+    user: UserCreate = Depends(validate_registration),
     session: AsyncSession = Depends(database.session_dependency),
 ):
-    existing_user = await get_user(session=session, username=user.username)
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail='Email already exists.')
-
+    '''
+    Register a new user.
+    '''
     await create_user(session=session, user=user)
 
     return {'message': 'User successfully created.'}
@@ -40,6 +38,9 @@ async def register_user(
 
 @router.post('/login', response_model=Token)
 async def login_user(user: UserSchema = Depends(validate_auth_user)):
+    '''
+    Generate JWT token.
+    '''
     jwt_payload = {
         'sub': user.username,
     }
@@ -51,14 +52,13 @@ async def login_user(user: UserSchema = Depends(validate_auth_user)):
     )
 
 
-@router.get('/users/me', response_model=UserRead)
+@router.get('/me', response_model=UserRead)
 async def user_check_info(
     user: UserSchema = Depends(get_current_user),
-    # payload: dict = Depends(get_user_token_payload),
 ):
-    # iat = payload.get('iat')
-    # logged_in = datetime.fromtimestamp(iat)
-
+    '''
+    Get current user's information.
+    '''
     return UserRead(
         username=user.username,
         email=user.email,
