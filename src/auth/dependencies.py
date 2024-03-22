@@ -1,6 +1,10 @@
-from fastapi import Form, HTTPException, Depends, status
+from fastapi import (
+    Form,
+    HTTPException,
+    Depends,
+    status,
+)
 from fastapi.security import (
-    HTTPBearer,
     OAuth2PasswordBearer,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,17 +13,42 @@ from jwt.exceptions import InvalidTokenError
 from database import database
 from auth.services import get_user
 from auth.utils import verify_password, decode_jwt
-from auth.schemas import UserSchema
+from auth.schemas import UserSchema, UserCreate
 
 
-http_bearer = HTTPBearer()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/users/login')
+
+
+async def validate_registration(
+    user: UserCreate,
+    session: AsyncSession = Depends(database.session_dependency),
+):
+    user_exists = await get_user(session=session, username=user.username, email=user.email)
+
+    if user_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail='User already exists.')
+
+    if user.password != user.password2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect passwords.')
+
+    new_user = UserCreate(
+        username=user.username,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        password=user.password,
+        password2=user.password2,
+    )
+
+    return new_user
 
 
 async def validate_auth_user(
-        username: str = Form(),
-        password: str = Form(),
-        session: AsyncSession = Depends(database.session_dependency),
+    username: str = Form(),
+    password: str = Form(),
+    session: AsyncSession = Depends(database.session_dependency),
 ):
     user = await get_user(session=session, username=username)
 
@@ -35,7 +64,10 @@ async def validate_auth_user(
             detail='User is not active',
         )
 
-    return user
+    return UserSchema(
+        username=user.username,
+        password=user.hashed_password
+    )
 
 
 async def get_user_token_payload(
@@ -43,7 +75,6 @@ async def get_user_token_payload(
 ):
     try:
         payload = decode_jwt(token=token)
-        print('PAYLOAD', payload)
         return payload
     except InvalidTokenError:
         raise HTTPException(
