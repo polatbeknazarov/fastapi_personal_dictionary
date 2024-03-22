@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     db_echo: bool = True
 
     # JWT Settings
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     ALGORITHM: str = 'RS256'
     PRIVATE_KEY_PATH: Path = BASE_DIR / 'private.pem'
