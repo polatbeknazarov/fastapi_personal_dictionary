@@ -75,6 +75,7 @@ async def get_user_token_payload(
 ):
     try:
         payload = decode_jwt(token=token)
+
         return payload
     except InvalidTokenError:
         raise HTTPException(
