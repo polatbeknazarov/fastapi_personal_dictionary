@@ -50,19 +50,6 @@ async def delete_word(
     user: UserSchema = Depends(get_current_user),
     session: AsyncSession = Depends(database.session_dependency),
 ):
-    # try:
-    #     await delete_word_orm(
-    #         word_id=word_id,
-    #         user_id=user.id,
-    #         session=session
-    #     )
-    # except:
-    # raise HTTPException(
-    #     status_code=status.HTTP_404_NOT_FOUND,
-    #     detail='Object is not found.'
-    # )
-
-    # return {'message': 'Object is successfully deleted.'}
     deleted = await delete_word_orm(word_id=word_id, user_id=user.id, session=session)
 
     if not deleted:
