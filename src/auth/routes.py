@@ -61,7 +61,6 @@ async def refresh_access_token(refresh_token: str, session: AsyncSession = Depen
     try:
         payload = decode_jwt(token=refresh_token)
         username: str = payload.get('sub')
-        print('##!@#!@#!@#!@#!@#!@#!@#@!#', username, payload.get('token_type'))
 
         if username is None or payload.get('token_type') != 'refresh_token':
             raise HTTPException(
