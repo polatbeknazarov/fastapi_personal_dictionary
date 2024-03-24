@@ -68,6 +68,5 @@ def decode_jwt(
         algorithm: str = settings.ALGORITHM,
 ):
     decoded = jwt.decode(jwt=token, key=publick_key, algorithms=[algorithm])
-    print('#############################decoded###########################', decoded)
 
     return decoded
