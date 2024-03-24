@@ -6,6 +6,7 @@ from sqlalchemy import (
     DateTime,
     Boolean,
 )
+from sqlalchemy.orm import relationship
 
 from database import Base
 
@@ -21,3 +22,5 @@ class User(Base):
     updated_at: datetime = Column(DateTime, default=datetime.utcnow,
                                   onupdate=datetime.utcnow)
     is_active: bool = Column(Boolean, default=True)
+
+    words = relationship('Word', back_populates='owner')
