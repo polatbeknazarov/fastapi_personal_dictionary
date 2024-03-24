@@ -39,12 +39,6 @@ async def get_word(word_id: int, user_id: int, session: AsyncSession) -> Word | 
 
 
 async def delete_word(word_id: int, user_id: int, session: AsyncSession) -> bool:
-    # word = delete(Word).filter(
-    #     Word.user_id == user_id, Word.id == word_id
-    # )
-
-    # await session.execute(word)
-    # await session.commit()
     word = await get_word(word_id=word_id, user_id=user_id, session=session)
 
     if word is not None:
